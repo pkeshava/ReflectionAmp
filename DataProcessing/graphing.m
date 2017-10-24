@@ -114,3 +114,44 @@ legend('Theoretical','Meaured'...
 xlabel('frequency');
 ylabel('S11 (dB)');
 hold off
+
+%% BandPass Filter Ananlysis
+
+clear all
+clc
+close all
+y = linspace(-40,0,21);
+load('data/BPF/ADS.mat');
+
+S21 = 20*log10(abs(BPF_V1.dataBlocks.data.dependents(7,:)));
+S43 = 20*log10(abs(BPF_V1.dataBlocks.data.dependents(21,:)));
+S65 = 20*log10(abs(BPF_V1.dataBlocks.data.dependents(35,:)));
+f = BPF_V1.dataBlocks.data.independent(1,:);
+M = csvread('data/BPF/filter_measured.csv');
+f2 = M(:,1);
+S_Measured = M(:,2);
+load('data/BPF/BPF_FEM.mat');
+S87 = 20*log10(abs(BPF_V1.dataBlocks.data.dependents(27,:)));
+
+plot(f,S21,f,S43,f,S65,f2,S_Measured, f,S87,'LineWidth',2);
+legend('ADS CIRCUIT SIMULATION','ADS EM SIMULATION'...
+    ,'HFSS SIMULATION','MEASURED', 'ADS FEM SIMULATION');
+set(gca,'YTick',y)
+xlabel('Frequency (GHz)');
+ylabel('S21 (dB)');
+title('BFP Response');
+grid on
+
+% title({'Feedback Components Removed --- VNA recalibrated for Wider Bandwidth'...
+%     ;'& ADJUSTED FREQUENCY FOR VISUALIZATION'});
+% legend('Theoretical','Meaured'...
+%     ,'Location','southwest','Orientation','horizontal');
+% xlabel('frequency');
+% ylabel('S11 (dB)');
+
+
+% S = RefAmpNoFeedback.dataBlocks.data.dependents(1,:);
+% f = RefAmpNoFeedback.dataBlocks.data.independent(1,:);
+% S11_mag = abs(S);
+% GdB = 20*log10(S11_mag);
+% [data] = xlsread('data/debugging/nofeedback.xlsx','1','A2:D1602');
