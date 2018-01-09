@@ -1,0 +1,14 @@
+---------------------------------------------------------------------------
+NCDrill File Report For: RefAmpRev2.PcbDoc   11/19/2017  7:20:29 PM
+---------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bottom Layer
+ASCII RoundHoles File : RefAmpRev2.TXT
+
+Tool         Hole Size           Hole Type     Hole Count Plated       Tool Travel
+---------------------------------------------------------------------------
+T1        25mil (0.635mm)          Round          30               8.15 Inch (207.02 mm)
+---------------------------------------------------------------------------
+Totals                                            30               8.15 Inch (207.02 mm)
+
+Total Processing Time (hh:mm:ss) : 00:00:00

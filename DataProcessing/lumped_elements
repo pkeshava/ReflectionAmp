@@ -1,0 +1,11 @@
+# Plotting impedance of measured inductance vs simulated inductance of lumped elements
+
+import io                       # file and stream handling
+import codecs                   # encoding for python... probably don't need
+import string
+import numpy as np              # Numpy provides a high-performance multidimensional array and basic tools to compute with and manipulate these arrays
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt # matlab like plotting
+import scipy
+from scipy import linalg, optimize, io
