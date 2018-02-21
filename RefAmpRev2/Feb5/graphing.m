@@ -86,9 +86,10 @@ Z11_sim = 50.*(1+S11_sim)./(1-S11_sim);
 
 plot(f_sim,real(Z11_sim),f_sim,imag(Z11_sim))
 
-%%
+%% Input Impedance of Microstrip looking in no lumped elements no power
 clc
 %close all
+
 clear all
 
 [data_VNA_11] = xlsread('DataFiles/stub_removed_delay.xlsx','1','A2:C1602');
@@ -202,3 +203,28 @@ Z_11 = 50.*(1+S_11)./(1-S_11);
 plot(f_meas,imag(Z_11),f_meas,real(Z_11))
 
 hold off
+%% Input Impedance of Microstrip looking in no power with connector in sim
+clc
+%close all
+
+clear all
+
+[data_VNA_11] = xlsread('DataFiles/debug_resistor.xlsx','1','A2:C1602');
+S_11 = data_VNA_11(:,2) + 1i*data_VNA_11(:,3);
+Z_11 = 50.*(1+S_11)./(1-S_11);
+f_meas = data_VNA_11(:,1);
+%figure;
+%plot(f_meas,imag(Z_11),f_meas,real(Z_11))
+
+%Setup touchsone file and write it
+S50 = reshape(S_11,[1,1,1601]);
+rfwrite(S50, f_meas, 'nopower.s1p')
+S = sparameters('nopower.s1p');
+S_11_smith = rfparam(S,1,1);
+figure;
+s = smithplot(f_meas,S_11_smith);
+S_ads = sparameters('DataFiles/unpowered_with_connector.s1p');
+S_11_ads = rfparam(S_ads,1,1);
+f_ads = S_ads.Frequencies;
+
+add(s, f_ads,S_11_ads);
