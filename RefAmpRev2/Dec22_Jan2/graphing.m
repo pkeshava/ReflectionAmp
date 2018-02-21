@@ -1,47 +1,128 @@
-%% Dec 22 2017 
+%% Not Powered
+% NOTE: Averaging and smoothing used on VNA to reduce noise. Noise is 
+% present because incident power is -60dBm so the amplifier operates
+% in the proper setting. 
+
 clear all
 clc
-close all
 
-load('ADS2.mat');
-S11_sim = visualization.dataBlocks(2).data.dependents(1,:);
-f_sim = visualization.dataBlocks(2).data.independent(1,:);
-S11_sim_mag = abs(S11_sim);
-GdB = 20*log10(S11_sim_mag);
+
+[data_VNA] = xlsread('DataFiles/Jan11_2.xlsx','7','A2:D1602');
+S11_VNA = data_VNA(:,2);
+load('DataFiles/unpoweredExtendedf.mat');
+S11_sim = data_analysis.dataBlocks.data.dependents(1,:);
+f_sim = data_analysis.dataBlocks.data.independent(1,:);
+S11_sim_dB = 20*log10(abs(S11_sim));
+
+% Convert to Z Parameters
+    % NOTE Z11 not acutally used b/c a better way to do this is to
+    % just grab the data from the VNA in Smith format
+    
 Z11_sim = 50.*(1+S11_sim)./(1-S11_sim);
+[Z11_meas, ~, ~, ~, S11_meas_dB, f_meas]= graphImpedance(data_VNA);
+% As is done below
 
-% [data] = xlsread('data/OMG2copy.xlsx','2','A2:D1602');
-% [data_good] = xlsread('data/FIRSTGOOD.xlsx','1','A2:D1602');
-% xlabel('frequency');
-% ylabel('S11 (dB)');
-% Biasing changed to include resistors. Simulations updated
+[data_VNA_z] = xlsread('DataFiles/Jan11_2.xlsx','8','A2:D1602');
+S_11 = data_VNA_z(:,2) + 1i*data_VNA_z(:,3);
+Z_11 = 50.*(1+S_11)./(1-S_11);
 
-
-[data] = xlsread('AmpRev2Testingedit.xlsx','2','A2:D1602');
-f = data(:,1);
-S11_r = data(:,3);
-S11_i = 1i*data(:,4);
-S11 = S11_r+S11_i;
-Z11 = 50.*(1+S11)./(1-S11);
-
-
-[data2] = xlsread('jan2_2.xlsx','3','A2:D1602');
-f2 = data2(:,1);
-S11_r2 = data2(:,3);
-S11_i2 = 1i*data2(:,4);
-S112 = S11_r2+S11_i2;
-Z112 = 50.*(1+S112)./(1-S112);
-Z112_10 = 50*9.*(1+S112)./(1-S112);
 
 figure;
-plot(f2,imag(Z112_10),f2,real(Z112_10))
-hold on
-plot(f_sim,imag(Z11_sim),f_sim,real(Z11_sim))
-hold off
+plot(f_meas,imag(Z_11),f_meas,real(Z_11),f_sim,imag(Z11_sim),f_sim,real(Z11_sim))
 
 figure;
-%plot(f,20*log10(abs(S11)));
-hold on
-plot(f_sim,GdB);
-plot(f2,20*log10(abs(S112)))
-hold off
+plot(f_sim,S11_sim_dB,f_meas,S11_VNA);
+
+% Setup touchsone file and write it
+    %S50 = reshape(S_11,[1,1,1601]);
+    %rfwrite(S50, f_meas, 'TestRF.s1p')
+    
+S = sparameters('DataFiles/touchstone/unpowered_extended.s1p');
+S_11_smith = rfparam(S,1,1);
+S_ADS = sparameters('DataFiles/touchstone/unpowered_impedance_ADS.s1p');
+S_11_smith_ADS = rfparam(S_ADS,1,1);
+figure;
+s = smithplot(S_11_smith);
+add(s, S_11_smith_ADS);
+
+
+%% asTested
+
+load('DataFiles/asTestedExtendedf.mat');
+S11_sim = data_analysis.dataBlocks.data.dependents(1,:);
+f_sim = data_analysis.dataBlocks.data.independent(1,:);
+S11_sim_dB = 20*log10(abs(S11_sim));
+
+[data_VNA] = xlsread('DataFiles/Jan11_2.xlsx','5','A2:D1602');
+S11_VNA = data_VNA(:,2);
+f_meas = data_VNA(:,1);
+
+
+% Convert to Z Parameters
+    % NOTE Z11 not acutally used b/c a better way to do this is to
+    % just grab the data from the VNA in Smith format
+Z11_sim = 50.*(1+S11_sim)./(1-S11_sim);
+[Z11_meas, ~, ~, ~, S11_meas_dB, f_meas]= graphImpedance(data_VNA);
+
+% As is done below
+
+[data_VNA_z] = xlsread('DataFiles/Jan11_2.xlsx','6','A2:D1602');
+S_11 = data_VNA_z(:,2) + 1i*data_VNA_z(:,3);
+Z_11 = 50.*(1+S_11)./(1-S_11);
+
+
+% Setup touchsone file and write it
+    % S50 = reshape(S_11,[1,1,1601]);
+    % rfwrite(S50, f_meas, 'DataFiles/touchstone/asTestedExtended.s1p')
+S = sparameters('DataFiles/touchstone/asTestedExtended.s1p');
+S_11_smith = rfparam(S,1,1);
+figure;
+smithchart(S_11_smith)
+
+figure;
+plot(f_meas,imag(Z_11),f_meas,real(Z_11),f_sim,imag(Z11_sim),f_sim,real(Z11_sim))
+
+figure;
+plot(f_sim,S11_sim_dB,f_meas,S11_VNA);
+
+
+%% Original Design
+% Note the impedance analysis for this is not that intersting 
+% because the resistance goes to zero as predicted by
+% steady state oscialltion theory
+
+load('DataFiles/OriginallyDesigned.mat');
+S11_sim = data_analysis.dataBlocks.data.dependents(1,:);
+f_sim = data_analysis.dataBlocks.data.independent(1,:);
+S11_sim_dB = 20*log10(abs(S11_sim));
+
+[data_VNA] = xlsread('DataFiles/Jan11.xlsx','3','A2:D1602');
+S11_VNA = data_VNA(:,2);
+f_meas = data_VNA(:,1);
+
+% Convert to Z Parameters
+Z11_sim = 50.*(1+S11_sim)./(1-S11_sim);
+[Z11_meas, ~, ~, ~, S11_meas_dB, f_meas]= graphImpedance(data_VNA);
+
+figure;
+plot(f_sim,S11_sim_dB,f_meas,S11_VNA);
+
+figure;
+plot(f_meas,imag(Z11_meas),f_meas,real(Z11_meas),f_sim,imag(Z11_sim),f_sim,real(Z11_sim))
+
+
+%% 3 Units comparison
+clear all
+close all
+[data_VNA] = xlsread('DataFiles/Jan11_2.xlsx','5','A2:D1602');
+S11_VNA = data_VNA(:,2);
+f_meas = data_VNA(:,1);
+[data_VNA_2] = xlsread('DataFiles/jan15_unit2.xlsx','3','A2:D1602');
+S11_VNA_2 = data_VNA_2(:,2);
+f_meas2 = data_VNA_2(:,1);
+[data_VNA_3] = xlsread('DataFiles/jan15_unit2.xlsx','5','A2:D1602');
+S11_VNA_3 = data_VNA_3(:,2);
+f_meas3 = data_VNA_3(:,1);
+
+
+plot(f_meas,S11_VNA,f_meas2,S11_VNA_2,f_meas3,S11_VNA_3);
